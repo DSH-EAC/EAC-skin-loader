@@ -85,6 +85,29 @@ test("workspace has at least the twelve migrated/built-in skin packages", () => 
   assert.ok(skinPackages.length >= 12, `expected >= 12 skin packages, found ${skinPackages.length}`);
 });
 
+test("all thirteen stable skin ids are covered by the host compatibility update", () => {
+  const expected = [
+    "aurora", "blue-fantasy", "deep-whale-day-night", "dragon-heir", "inkwash",
+    "maid-atelier", "miku", "minecraft", "qq98", "ths", "trading", "whale-song", "xp",
+  ];
+  assert.deepEqual(skinPackages.map((pkg) => pkg.dir).sort(), expected);
+  for (const pkg of skinPackages) {
+    assert.equal(pkg.skinId, `dsh-eac.skin.${pkg.dir}`, `${pkg.dir}: stable skin id`);
+  }
+});
+
+test("loader and every skin admit only the two explicitly supported DSH releases", () => {
+  const directories = [loaderDir, ...skinPackages.map((pkg) => `${skinsRoot}/${pkg.dir}`)];
+  for (const dir of directories) {
+    const pkg = readJson(`${dir}/package.json`);
+    const peers = pkg.peerDependencies as Record<string, string>;
+    const engines = pkg.engines as Record<string, string>;
+    assert.equal(peers["@deepseek-ai/dsh"], "0.1.7-rc.2 || 0.2.0-rc.2", `${dir}: peer gate`);
+    assert.equal(engines.dsh, peers["@deepseek-ai/dsh"], `${dir}: engines and peer gate agree`);
+    assert.equal(peers["@deepseek-ai/cordis"], "~4.0.4", `${dir}: unchanged Cordis contract`);
+  }
+});
+
 test("skin package names are globally unique (a duplicate breaks release artifacts)", () => {
   const seen = new Map<string, string[]>();
   for (const pkg of skinPackages) {

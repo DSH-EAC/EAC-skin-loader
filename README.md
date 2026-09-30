@@ -8,11 +8,13 @@
 | 字段 | 值 |
 | --- | --- |
 | 公约 | `dsh.ecosystem.ui-skin-loader/v1`（[公约仓库](https://github.com/DSH-EAC/dsh-ui-skin-loader-convention)） |
-| 适配宿主 | `@deepseek-ai/dsh` `0.1.7-rc.2` |
+| 适配宿主 | `@deepseek-ai/dsh` `0.1.7-rc.2` 或 `0.2.0-rc.2` |
 | 运行时 | Node.js >= 24（源码经 Node 原生 type-stripping 直接执行） |
 | 当前版本 | 1.1.0（[CHANGELOG](./CHANGELOG.md)） |
 
 ## 它是什么
+
+`0.2.0-rc.2` 的适配覆盖全部 13 款皮肤：保留原 adapter、稳定 ID、设置命名空间和视觉源码，增加真实官方发布产物的接口契约测试。此轮验证不等同于新版 Desktop 实机验收；材料版本及验证边界见 [`docs/api-notes.md`](./docs/api-notes.md) 和 [`docs/verification.md`](./docs/verification.md)。
 
 - **加载器**（`@dsh-eac/ui-skin-loader`）：皮肤发现登记、全局互斥切换、持久化与跨重启恢复、故障隔离（激活抛错回滚 / 关闭超时如实标记疑似残留）、跨标签页同步，以及设置页里的换肤控制台（亮暗双案自适应）。
 - **皮肤**：一个遵循公约的皮肤插件在未激活时**零副作用**（只登记元数据），激活后才产生可见副作用，被换走或停用时**彻底关闭**——宿主观感与它从未激活时逐像素一致。v1.0.0 的五款皮肤经实机验证矩阵逐款验收；v1.1.0 新增的七款迁移皮肤经类型检查、lint、单元测试、构建与打包冒烟验证（实机验收清单见 [`docs/verification.md`](./docs/verification.md)）。
@@ -47,7 +49,7 @@
 
 ### 前置条件
 
-- [DSH](https://www.npmjs.com/package/@deepseek-ai/dsh) `0.1.7-rc.2`（`dsh` 命令行可用）；
+- [DSH](https://www.npmjs.com/package/@deepseek-ai/dsh) `0.1.7-rc.2` 或 `0.2.0-rc.2`（`dsh` 命令行可用；仅声明这两个精确版本）；
 - Node.js **>= 24**（构建安装包时需要 pnpm 11；安装动作本身由 `dsh` 驱动）。
 
 ### 1. 构建安装包

@@ -11,11 +11,11 @@
   },
   "description": "「鲸吟」— 深海氛围背景 + 冰蓝海洋调色板的 DSH UI 皮肤（自 DSH-Desktop-EAC 迁移，covenant-converted）。",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {

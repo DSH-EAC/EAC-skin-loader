@@ -1,4 +1,34 @@
-# DSH 0.1.7-rc.2 API 实机核对笔记（M1 / T2.2 产出）
+# DSH API 核对笔记
+
+## 0.2.0-rc.2 适配补充（2026-09-30）
+
+本节是新增版本的产物契约核对，不是 Desktop boot 或视觉验收。下方 `0.1.7-rc.2` 原报告保持历史含义，不将旧版实机结果移用于新版。
+
+### 材料与版本边界
+
+- 加载器基线：`afa947215a862a9c3304f6fff7a812efe5a42fdc`。
+- 规划指定官方 tag：`dsh-v0.2.0-rc.2`，提交 `639ed015397290b3745d163aafe02ffee4aa3f84`（来自已确认的规划材料，本轮未重新获取该 tag 源码）。
+- 实际执行契约测试的材料：只读提取 `D:/profile/dsd/resources/app.asar` 中的官方包；Desktop 元数据版本为 `0.2.0-rc.2`，`dshBuildCommit=04f392c9ddd144fa426da2045178797da6db6c11`，`dshBuildDirty=false`。**此构建提交与指定 tag 提交不同，不能视作同一源码快照。**
+- 官方包版本逐个校验为 `0.2.0-rc.2`，Cordis 为 `4.0.4`，Schemastery 为 `3.18.4`。store 的 Node 入口需要额外的 Zustand/Immer 构建依赖，这些仅安装于忽略的 `.verify/` 目录，未加入业务依赖。
+
+### 接口结论
+
+| 能力 | 本次核对与测试 | 复用结论及边界 |
+| --- | --- | --- |
+| client 模块 | 官方 `ClientModuleSystem` 接受 `{ id, factory }`，惰性材料化、重复 import 缓存 | 沿用 `getModuleLoader()` |
+| 槽位 | 官方 `SlotCore` 接受 list 席位、幂等释放及 owner 级联 | 沿用 register；三个席位 key 在 ui-layout/ui-sidebar/ui-settings-general 发布 bundle 中核对；测试中的声明人为提供，不验证真实席位渲染或 Cordis `slots.inject` |
+| 主题 | 官方 `ThemeRuntime` 接受 register 与亮暗双值 override，释放后保留偏好且移除 token | 沿用 adapter；未模拟系统主题切换或 React 渲染 |
+| locale | 官方 `LocaleRuntime` 接受双语 register/bind、插值和幂等清理 | 沿用 adapter；不执行 Desktop preload 语言初始化 |
+| 设置 | 官方 ConfigForms、store、schema 读取既有 `activeSkin`，稳定快照，拒绝写入回读、接受写入到 `default`，事件订阅释放 | 沿用 adapter；Cordis Service 注入与远端 transport 是明确边界桩，不是实际 host 写盘或 SSE 网络验证 |
+| host 配置 | 发布产物仍通过 `ctx.settings.configure({ auto: false }, ctx.fiber)` 禁用自动配置 | 沿用现有 host adapter；host 注入的生产形态通过只读检查，现有 host 单测验证 schema 与调用形态 |
+
+未发现要求复制新版 adapter 的调用形态差异，因此保留 `dsh-0.1.7.ts` 及 `dsh-0.1.7-host.ts` 的文件名和生产实现。皮肤的可选 `workspaces`/`connection` 服务访问以及深鲸的 `theme.setTheme` 调用未作机械改写；逐包生命周期单测仍需与真实 Desktop 验收区分。
+
+兼容声明为 `0.1.7-rc.2 || 0.2.0-rc.2`，只放行这两个精确版本；13 款稳定 ID、`activeSkin`、命名空间、默认外观和 vendor 内容不变。接口核对和本地测试不能证明新版 CSS/DOM 视觉、插件安装、真实单实例或跨重启行为已通过。
+
+---
+
+# DSH 0.1.7-rc.2 API 实机核对笔记（M1 / T2.2 历史产出）
 
 > 本文是 adapter 层（`src/adapter/dsh-0.1.7.ts`，T2.3）的**唯一权威**依据。
 > 全部结论来自 2026-09-25 在完全隔离环境（`DSH_HOME=<repo>/.verify/dsh-home`）中对

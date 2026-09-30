@@ -12,11 +12,11 @@
   "description": "Abyssal maid atelier skin migrated from DSH-Desktop-EAC; artwork remains under CC BY-NC-SA 4.0 with full attribution chain.",
   "license": "MIT AND CC-BY-NC-SA-4.0",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {

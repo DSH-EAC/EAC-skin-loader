@@ -1,4 +1,68 @@
-# 验证矩阵 V1-V11 实跑报告（T2.7 全量验证战役）
+# 验证记录
+
+## 0.2.0-rc.2 本地适配验证（2026-09-30）
+
+任务 `skin-integration`，派发 `skin-adapt-write-001`。交付状态为**已实现，待审查**，不是独立审查或 Desktop 实机通过。
+
+基线 `afa947215a862a9c3304f6fff7a812efe5a42fdc`；分支 `codex/adapt-harness-0.2.0-rc.2`。本轮仅修改 14 包宿主兼容声明、两个测试文件及相关文档，未提交、推送、发布或改动真实安装树。
+
+### 实际执行
+
+环境：Windows / PowerShell，Node `24.18.1`，pnpm `11.7.0`。
+
+| 命令 | 退出码 | 实际结果 |
+| --- | --- | --- |
+| `pnpm install --frozen-lockfile --fetch-retries=0 --fetch-timeout=20000` | 0 | 安装仓库依赖，未更改 lockfile |
+| `npm install --prefix .verify --ignore-scripts --no-audit --no-fund --package-lock=false --save=false --fetch-retries=0 --fetch-timeout=20000 zustand@4.4.7 immer@10.1.1 react@18.3.1` | 0 | 仅隔离契约探针依赖，未加入业务依赖 |
+| `pnpm --filter <下表每个包名> test`（分别执行 14 次） | 每次 0 | 共 211 项，211 通过，零失败、零跳过 |
+| `pnpm typecheck` | 0 | 14 包类型检查通过 |
+| `pnpm build` | 0 | 14 包生成 `lib/index.js` 与 `lib/client.js` |
+| `pnpm --filter @dsh-eac/ui-skin-loader lint` | 0 | 修改的 loader 测试文件通过 lint |
+| `git diff --check` | 0 | 无空白错误；仅 Git autocrlf 行尾提示，不是检查失败 |
+
+逐包测试时设置了 `DSH_OFFICIAL_NODE_MODULES=F:/dsh-ui-skin-loader/.verify/official-0.2.0-rc.2/node_modules`，因此 loader 中的 **5 项新版真实产物契约测试实际运行，而非 skip**。普通生命周期/DOM 单测仍是仓库原有模拟环境，不是官方 Desktop 实机。
+
+| 包名（前缀均为 `@dsh-eac/`） | 稳定皮肤 ID | 测试通过数 |
+| --- | --- | --- |
+| `ui-skin-loader` | 不适用（加载器） | 119 |
+| `skin-aurora` | `dsh-eac.skin.aurora` | 21 |
+| `skin-blue-fantasy` | `dsh-eac.skin.blue-fantasy` | 3 |
+| `skin-deep-whale-day-night` | `dsh-eac.skin.deep-whale-day-night` | 3 |
+| `skin-dragon-heir` | `dsh-eac.skin.dragon-heir` | 13 |
+| `skin-inkwash` | `dsh-eac.skin.inkwash` | 9 |
+| `skin-maid-atelier` | `dsh-eac.skin.maid-atelier` | 3 |
+| `skin-miku` | `dsh-eac.skin.miku` | 3 |
+| `skin-minecraft` | `dsh-eac.skin.minecraft` | 3 |
+| `skin-qq98` | `dsh-eac.skin.qq98` | 3 |
+| `skin-ths` | `dsh-eac.skin.ths` | 3 |
+| `skin-trading` | `dsh-eac.skin.trading` | 12 |
+| `skin-whale-song` | `dsh-eac.skin.whale-song` | 13 |
+| `skin-xp` | `dsh-eac.skin.xp` | 3 |
+
+日志为忽略目录中的 `.verify/<去除 @dsh-eac/ 前缀的包名>-test.log`，不是提交产物；审查者可用上述命令复跑。新版真实产物测试初跑因 store 缺少 Zustand 依赖失败（4 项中 2 通过、2 失败）；隔离安装依赖后通过，随后新增 locale 契约并随 loader 逐包测试通过。新增主题测试的类型声明错误也已修正，类型检查复跑通过。未把失败命令记为通过。
+
+### 材料与复跑
+
+真实产物测试文件：`packages/loader/src/adapter/dsh-0.2.0-artifacts.test.ts`。只读提取本机官方 `app.asar` 的模块到隔离目录，未执行 Desktop。材料来源、构建提交与指定 tag 的区别见 `api-notes.md` 新版补充；实际测试构建提交 `04f392c9ddd144fa426da2045178797da6db6c11` **不等于**规划指定 tag 提交 `639ed015397290b3745d163aafe02ffee4aa3f84`。
+
+```powershell
+$env:DSH_OFFICIAL_NODE_MODULES = '<隔离的官方 0.2.0-rc.2 node_modules 绝对路径>'
+pnpm --filter @dsh-eac/ui-skin-loader test
+```
+
+材料须含 `dsh-client-{modules,ui-slots,ui-theme,locale,ui-settings,store}` 的 `package.json` 和相应 `lib/client.js` 或 `lib/index.js`，并满足 store 的 Node 依赖。未提供环境变量时这 5 项显式跳过；指定错误版本、缺件或缺依赖时失败。普通 `pnpm test` 的成功不能替代设定材料后的这 5 项通过。
+
+### 未执行及限制
+
+- **官方 Desktop 安装/渲染、13 款热切换、真实写盘、SSE 网络及跨重启：未执行。** 真实 Desktop 已运行，本轮不能证明 DSH_HOME、Electron userData 和单实例锁均已隔离，因此未启动第二实例、未停现有客户端、未写真实 home 或安装树。后续需用户提供独立测试环境或确认能够隔离 home + userData + 单实例锁的启动方式，再进行真实 GUI 验收。
+- 固定 tag 提交的重新取件和执行验证：未执行；本轮优先使用已有安装产物与已确认规划，不将同版本不同构建提交混为一谈。是否还需固定 tag 产物对照由 major 决定。
+- 全 workspace `pnpm test`：未额外执行。共享生产 adapter/runtime 没有实质改动，按派发逐包执行全部 14 包测试，避免重复。
+- EAC/Rust/安装器矩阵、聚合打包、发布：不在本任务范围。
+- 未复制 adapter，未修改 vendor、皮肤视觉、稳定 ID、`activeSkin`/`default`、schema 或生产清理逻辑。此范围控制不能替代真实新版 CSS/DOM 的视觉验证。
+
+---
+
+# 验证矩阵 V1-V11 实跑报告（T2.7 历史全量验证战役）
 
 > 0.1.7-rc.2 隔离环境全量验证：V1-V11 作为一次完整战役实跑，全部结论以本战役实测为准（不引用旧结论代替实跑）。
 > 日期：2026-09-26 ｜ 环境：`.verify/dsh-home-t9`（全新隔离 DSH_HOME）｜ 执行：T2.7

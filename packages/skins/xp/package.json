@@ -12,11 +12,11 @@
   "description": "Windows XP Luna chrome and Bliss-style desktop migrated from DSH-Desktop-EAC; covenant-converted lifecycle.",
   "license": "MIT AND BSD-3-Clause",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {
