@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-inkwash",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -11,11 +11,11 @@
   },
   "description": "「水墨青烟」— 浅色纸质感 + 水墨氛围背景的 DSH UI 皮肤（公约参考实现示例，不提供自定义设置）。",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {
@@ -24,7 +24,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.inkwash",
       "name": "水墨青烟",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "DSH-EAC",
       "description": "浅色纸质感 + 水墨氛围背景的内置示例皮肤（公约参考实现；不提供自定义设置）。",
       "tags": [

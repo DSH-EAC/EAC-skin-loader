@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-dragon-heir",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -11,11 +11,11 @@
   },
   "description": "「龙的传人」— 不屈龙魂/万里长城双主题 + 朱砂龙印的 DSH UI 皮肤（自 DSH-Desktop-EAC 迁移，covenant-converted）。",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {
@@ -24,7 +24,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.dragon-heir",
       "name": "龙的传人",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "zhu1090093659 (dsh-web-ui) · DSH-EAC (covenant conversion)",
       "description": "不屈龙魂 · 万里长城双主题 · 朱砂龙印。观感内容原样迁移自 dsh-web-ui（BSD-3-Clause © zhu1090093659）经 DSH-Desktop-EAC@26841f5 分发，执行骨架已公约化（activate/deactivate）；见 THIRD-PARTY-NOTICES.md。",
       "tags": [

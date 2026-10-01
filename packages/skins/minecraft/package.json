@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-minecraft",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -12,11 +12,11 @@
   "description": "Procedural voxel panorama and signboard controls migrated from DSH-Desktop-EAC; covenant-converted lifecycle.",
   "license": "MIT AND BSD-3-Clause",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {
@@ -25,7 +25,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.minecraft",
       "name": "Minecraft 方块世界",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "zhu1090093659 (dsh-web-ui) · DSH-EAC",
       "description": "Procedural voxel panorama and signboard controls migrated from DSH-Desktop-EAC; covenant-converted lifecycle.",
       "tags": [

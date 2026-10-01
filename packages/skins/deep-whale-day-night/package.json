@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-deep-whale-day-night",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -12,11 +12,11 @@
   "description": "Deep Whale Day & Night skin migrated from a pinned upstream package; CC BY-NC-SA 4.0 non-commercial.",
   "license": "CC-BY-NC-SA-4.0",
   "peerDependencies": {
-    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "@deepseek-ai/cordis": "~4.0.4"
   },
   "engines": {
-    "dsh": "0.1.7-rc.2",
+    "dsh": "0.1.7-rc.2 || 0.2.0-rc.2",
     "node": ">=24"
   },
   "dsh": {
@@ -25,7 +25,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.deep-whale-day-night",
       "name": "鲸鱼娘昼夜工坊",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "Small-tailqwq · 上善 · zipzip · DSH-EAC",
       "description": "Deep Whale Day & Night skin with full CC BY-NC-SA 4.0 attribution chain.",
       "tags": [
