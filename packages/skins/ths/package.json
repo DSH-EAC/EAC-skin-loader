@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-ths",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -25,7 +25,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.ths",
       "name": "同花顺风格",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "zhu1090093659 (dsh-web-ui) · DSH-EAC",
       "description": "Red-market quote terminal skin migrated from DSH-Desktop-EAC; covenant-converted lifecycle.",
       "tags": [

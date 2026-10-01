@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/ui-skin-loader",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",

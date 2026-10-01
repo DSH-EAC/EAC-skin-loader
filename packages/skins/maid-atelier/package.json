@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-maid-atelier",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -25,7 +25,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.maid-atelier",
       "name": "深海女仆工坊",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "Small-tailqwq · 上善 · zipzip · DSH-EAC",
       "description": "Abyssal maid atelier skin migrated from DSH-Desktop-EAC; artwork remains under CC BY-NC-SA 4.0 with full attribution chain.",
       "tags": [

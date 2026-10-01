@@ -9,7 +9,7 @@ DSH UI 皮肤加载器 —— 弱约束公约 [`dsh.ecosystem.ui-skin-loader/v1`
 ## 安装
 
 ```bash
-dsh plugin --profile web add <dist>/dsh-eac-ui-skin-loader-1.1.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-ui-skin-loader-1.2.0.tgz
 ```
 
 皮肤包依赖本加载器，建议先装加载器再逐个安装皮肤包。完整的构建、安装与验证说明见仓库根 [`README.md`](https://github.com/DSH-EAC/dsh-ui-skin-loader#readme)，宿主 API 实测依据见 `docs/api-notes.md`，验证战役证据见 `docs/verification.md`。

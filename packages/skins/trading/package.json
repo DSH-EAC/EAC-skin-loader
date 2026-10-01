@@ -1,6 +1,6 @@
 {
   "name": "@dsh-eac/skin-trading",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -24,7 +24,7 @@
       "apiVersion": "dsh.ecosystem.ui-skin-loader/v1",
       "id": "dsh-eac.skin.trading",
       "name": "交易终端",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": "zhu1090093659 (dsh-web-ui) · DSH-EAC (covenant conversion)",
       "description": "实时行情跑马灯 · 长桥港美股行情 · 红涨绿跌交易终端。观感内容原样迁移自 dsh-web-ui（BSD-3-Clause © zhu1090093659）经 DSH-Desktop-EAC@26841f5 分发，执行骨架已公约化（activate/deactivate）；见 THIRD-PARTY-NOTICES.md。",
       "tags": [

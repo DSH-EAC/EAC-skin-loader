@@ -10,7 +10,7 @@
 | 公约 | `dsh.ecosystem.ui-skin-loader/v1`（[公约仓库](https://github.com/DSH-EAC/dsh-ui-skin-loader-convention)） |
 | 适配宿主 | `@deepseek-ai/dsh` `0.1.7-rc.2` 或 `0.2.0-rc.2` |
 | 运行时 | Node.js >= 24（源码经 Node 原生 type-stripping 直接执行） |
-| 当前版本 | 1.1.0（[CHANGELOG](./CHANGELOG.md)） |
+| 当前版本 | 1.2.0（[CHANGELOG](./CHANGELOG.md)） |
 
 ## 它是什么
 
@@ -69,19 +69,19 @@ npm pack --pack-destination <dist 绝对路径>
 得到 14 个 tarball：加载器 1 个 + 皮肤 13 个。
 
 ```text
-dsh-eac-ui-skin-loader-1.1.0.tgz       加载器
-dsh-eac-skin-aurora-1.1.0.tgz          极光之夜
-dsh-eac-skin-inkwash-1.1.0.tgz         水墨青烟
-dsh-eac-skin-trading-1.1.0.tgz         交易终端
-dsh-eac-skin-dragon-heir-1.1.0.tgz     龙的传人
-dsh-eac-skin-whale-song-1.1.0.tgz      鲸吟
-dsh-eac-skin-blue-fantasy-1.1.0.tgz    蓝色幻想
-dsh-eac-skin-maid-atelier-1.1.0.tgz    深海女仆工坊
-dsh-eac-skin-miku-1.1.0.tgz            初音未来 · 电子歌姬
-dsh-eac-skin-minecraft-1.1.0.tgz       Minecraft 方块世界
-dsh-eac-skin-qq98-1.1.0.tgz            QQ2008 怀旧版
-dsh-eac-skin-ths-1.1.0.tgz             同花顺风格
-dsh-eac-skin-xp-1.1.0.tgz              Windows XP (Luna)
+dsh-eac-ui-skin-loader-1.2.0.tgz       加载器
+dsh-eac-skin-aurora-1.2.0.tgz          极光之夜
+dsh-eac-skin-inkwash-1.2.0.tgz         水墨青烟
+dsh-eac-skin-trading-1.2.0.tgz         交易终端
+dsh-eac-skin-dragon-heir-1.2.0.tgz     龙的传人
+dsh-eac-skin-whale-song-1.2.0.tgz      鲸吟
+dsh-eac-skin-blue-fantasy-1.2.0.tgz    蓝色幻想
+dsh-eac-skin-maid-atelier-1.2.0.tgz    深海女仆工坊
+dsh-eac-skin-miku-1.2.0.tgz            初音未来 · 电子歌姬
+dsh-eac-skin-minecraft-1.2.0.tgz       Minecraft 方块世界
+dsh-eac-skin-qq98-1.2.0.tgz            QQ2008 怀旧版
+dsh-eac-skin-ths-1.2.0.tgz             同花顺风格
+dsh-eac-skin-xp-1.2.0.tgz              Windows XP (Luna)
 ```
 
 ### 2. 逐包装入 DSH
@@ -89,19 +89,19 @@ dsh-eac-skin-xp-1.1.0.tgz              Windows XP (Luna)
 对每个 tarball 执行一次 `dsh plugin add`（profile 按需命名；皮肤包依赖加载器，建议先装加载器）：
 
 ```bash
-dsh plugin --profile web add <dist>/dsh-eac-ui-skin-loader-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-aurora-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-inkwash-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-trading-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-dragon-heir-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-whale-song-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-blue-fantasy-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-maid-atelier-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-miku-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-minecraft-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-qq98-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-ths-1.1.0.tgz
-dsh plugin --profile web add <dist>/dsh-eac-skin-xp-1.1.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-ui-skin-loader-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-aurora-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-inkwash-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-trading-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-dragon-heir-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-whale-song-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-blue-fantasy-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-maid-atelier-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-miku-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-minecraft-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-qq98-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-ths-1.2.0.tgz
+dsh plugin --profile web add <dist>/dsh-eac-skin-xp-1.2.0.tgz
 ```
 
 安装形态说明（tarball 链路实测）：
