@@ -110,6 +110,7 @@ function createFakeSettings(initial: Partial<LoaderSettingsValue> = {}) {
   };
   return {
     form,
+    listenerCount: () => listeners.size,
     writes,
     failNextWrite() {
       failNextWrite = true;
@@ -166,7 +167,7 @@ function createFakeSettings(initial: Partial<LoaderSettingsValue> = {}) {
 function createFakeAdapter(settings: ReturnType<typeof createFakeSettings>) {
   const remoteListeners = new Map<string, Set<(...args: unknown[]) => void>>();
   const slotEntries: Array<{ name: string; dispose: () => void; disposed: boolean }> = [];
-  const injectEntries: Array<{ key: string; disposed: boolean }> = [];
+  const injectEntries: Array<{ key: string; callback: () => unknown; disposed: boolean }> = [];
   const adapter: DshAdapter = {
     slots: {
       register(options, component) {
@@ -1120,7 +1121,7 @@ test("stop during an in-flight activation shuts the half-activated skin down", a
   assert.equal(h.service.current(), DEFAULT_SKIN_ID);
 });
 
-test("slot registration after shutdown (hung activation resumes late) is disposed immediately (closed ledger)", async () => {
+test("slot registration after shutdown (hung activation resumes late) never reaches the adapter (closed ledger)", async () => {
   const h = createHarness();
   let skinCtx: Parameters<SkinRegistration["activate"]>[0] | undefined;
   const release = deferred();
@@ -1142,11 +1143,134 @@ test("slot registration after shutdown (hung activation resumes late) is dispose
   release.resolve();
   await h.clock.pump();
   skinCtx?.slots.register({ kind: "single", name: "settings.section" }, () => null);
-  assert.equal(h.remote.slotEntries.length, 1);
-  assert.equal(h.remote.slotEntries[0]?.disposed, true);
+  assert.equal(h.remote.slotEntries.length, 0);
   // 返回的 no-op disposer 也可安全调用
   const off = skinCtx?.slots.inject("settings.section", () => undefined);
   off?.();
-  assert.equal(h.remote.injectEntries.length, 1);
-  assert.equal(h.remote.injectEntries[0]?.disposed, true);
+  assert.equal(h.remote.injectEntries.length, 0);
+});
+
+ test("aborted activation rejects registrations before its shutdown starts", async () => {
+  const h = createHarness();
+  const release = deferred();
+  let oldContext: Parameters<SkinRegistration["activate"]>[0] | undefined;
+  h.service.registerSkin(makeSkin("alpha", {
+    activate(ctx) {
+      oldContext = ctx;
+      return release.promise;
+    },
+  }));
+  h.service.registerSkin(makeSkin("beta"));
+  const oldSwitch = h.service.switchTo("alpha");
+  await h.clock.pump();
+  const newSwitch = h.service.switchTo("beta");
+  assert.equal(oldContext?.signal.aborted, true);
+  oldContext?.slots.register({ kind: "single", name: "settings.section" }, () => null);
+  oldContext?.slots.inject("settings.section", () => assert.fail("stale callback ran"));
+  assert.equal(h.remote.slotEntries.length, 0);
+  assert.equal(h.remote.injectEntries.length, 0);
+  release.resolve();
+  assert.equal((await oldSwitch).ok, false);
+  assert.equal((await newSwitch).ok, true);
+  assert.equal(h.service.current(), "beta");
+});
+
+ test("captured inject callback cannot run after its activation closes", async () => {
+  const h = createHarness();
+  let calls = 0;
+  h.service.registerSkin(makeSkin("alpha", {
+    activate(ctx) {
+      ctx.slots.inject("settings.section", () => { calls++; });
+    },
+  }));
+  await h.service.switchTo("alpha");
+  const queued = h.remote.injectEntries[0]?.callback;
+  await h.service.switchTo(DEFAULT_SKIN_ID);
+  queued?.(); // A callback already captured by the upstream dispatch snapshot.
+  assert.equal(calls, 0);
+});
+
+ test("old release is single-use and cannot release the new same-name registration", async () => {
+  const h = createHarness();
+  const live = new Map<string, number>();
+  let token = 0;
+  let oldOff: (() => void) | undefined;
+  h.remote.adapter.slots.register = (options) => {
+    const owner = ++token;
+    live.set(options.name, owner);
+    // Deliberately hostile on a second call: runtime must not invoke it twice.
+    return () => { live.delete(options.name); };
+  };
+  h.service.registerSkin(makeSkin("alpha", {
+    activate(ctx) {
+      oldOff = ctx.slots.register({ kind: "single", name: "same" }, () => null);
+    },
+  }));
+  h.service.registerSkin(makeSkin("beta", {
+    activate(ctx) { ctx.slots.register({ kind: "single", name: "same" }, () => null); },
+  }));
+  await h.service.switchTo("alpha");
+  const replacement = h.service.switchTo("beta");
+  await replacement;
+  oldOff?.();
+  assert.equal(live.get("same"), 2);
+});
+
+ test("ledger cleanup continues in reverse order and reports residue separately from persistence failure", async () => {
+  const h = createHarness();
+  const order: string[] = [];
+  h.remote.adapter.slots.register = (options) => () => {
+    order.push(options.name);
+    if (options.name === "broken") throw new Error("release failed");
+  };
+  h.service.registerSkin(makeSkin("alpha", {
+    activate(ctx) {
+      for (const name of ["first", "broken", "last"]) {
+        ctx.slots.register({ kind: "single", name }, () => null);
+      }
+    },
+  }));
+  await h.service.switchTo("alpha");
+  // Reject only the activeSkin write, not an earlier cleanup faultLog write.
+  const set = h.settings.form.set;
+  h.settings.form.set = (field, value) => field === "activeSkin" ? Promise.resolve(false) : set(field, value);
+  const result = await h.service.switchTo(DEFAULT_SKIN_ID);
+  assert.equal(result.ok, true);
+  assert.deepEqual(order, ["last", "broken", "first"]);
+  assert.equal(h.service.list()[0]?.status, "suspect-residue");
+  assert.match(result.warning ?? "", /release failed.*suspect-residue/);
+  assert.match(result.warning ?? "", /failed to persist/);
+  const kinds = lastFaultLogWrite(h.settings).map((entry) => entry.kind);
+  assert.ok(kinds.includes("deactivate-failed"));
+  assert.ok(kinds.includes("persist-failed"));
+});
+
+ test("unregistered pending activation cannot commit when it resolves inside the grace window", async () => {
+  const h = createHarness();
+  const release = deferred();
+  const off = h.service.registerSkin(makeSkin("alpha", { activate: () => release.promise }));
+  const pending = h.service.switchTo("alpha");
+  await h.clock.pump();
+  off();
+  release.resolve();
+  const result = await pending;
+  assert.equal(result.ok, false);
+  assert.equal(h.service.current(), DEFAULT_SKIN_ID);
+  assert.equal(lastActiveSkinWrite(h.settings), DEFAULT_SKIN_ID);
+});
+
+ test("stop continues through a failing remote listener release to clean form listeners and skin", async () => {
+  const h = createHarness();
+  await h.offStart();
+  h.remote.adapter.remote.$on = () => () => { throw new Error("remote release failed"); };
+  const runtime = createSkinRuntime({ adapter: h.remote.adapter, timers: h.clock.timers });
+  const service = runtime.expose();
+  const stop = runtime.start();
+  const skin = makeSkin("alpha");
+  service.registerSkin(skin);
+  await service.switchTo("alpha");
+  await stop();
+  assert.equal(h.settings.listenerCount(), 0);
+  assert.deepEqual(skin.calls, ["activate", "deactivate"]);
+  assert.equal(service.current(), DEFAULT_SKIN_ID);
 });

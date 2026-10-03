@@ -554,6 +554,25 @@ test("slots.inject tolerates a callback returning void", () => {
   assert.doesNotThrow(() => injectDisposer());
 });
 
+ test("slots.inject iterable cleanup continues after exceptions and aggregates failures", () => {
+  const { ctx, slots } = createFakeContext();
+  const adapter = createDsh017Adapter(ctx);
+  slots.declare("settings.section");
+  const order: string[] = [];
+  const off = adapter.slots.inject("settings.section", () => [
+    () => { order.push("first"); throw new Error("first failed"); },
+    () => { order.push("middle"); },
+    () => { order.push("last"); throw new Error("last failed"); },
+  ]);
+  assert.throws(off, (error: unknown) => {
+    assert.ok(error instanceof AggregateError);
+    assert.equal(error.errors.length, 2);
+    return true;
+  });
+  assert.deepEqual(order, ["last", "middle", "first"]);
+  assert.doesNotThrow(off);
+});
+
 // ---------------------------------------------------------------------------
 // DshTheme：register/overrideTokens 参数映射与 api-notes §7 一致
 // ---------------------------------------------------------------------------
