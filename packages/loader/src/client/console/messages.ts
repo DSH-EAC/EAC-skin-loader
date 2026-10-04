@@ -42,6 +42,20 @@ export interface ConsoleMessages {
   "empty.hint": string;
   "overlay.close": string;
   "footer.open": string;
+  "provision.title": string;
+  "provision.subtitle": string;
+  "provision.count": string;
+  "provision.status.installed": string;
+  "provision.status.failed": string;
+  "provision.status.pending": string;
+  "provision.status.installing": string;
+  "provision.status.present": string;
+  "provision.status.excluded": string;
+  "provision.versionDiff": string;
+  "provision.action.retry": string;
+  "provision.action.retrying": string;
+  "provision.toggle": string;
+  "provision.idle": string;
 }
 
 export const MESSAGES: Record<"en" | "zh", ConsoleMessages> = {
@@ -72,6 +86,20 @@ export const MESSAGES: Record<"en" | "zh", ConsoleMessages> = {
       "Install a skin plugin that follows the skin covenant and it will appear here.",
     "overlay.close": "Close",
     "footer.open": "Skins",
+    "provision.title": "Skin provisioning",
+    "provision.subtitle": "Missing covenant skins are fetched in the background; your current look is never switched.",
+    "provision.count": "{installed}/{total} ready",
+    "provision.status.installed": "Ready",
+    "provision.status.failed": "Failed",
+    "provision.status.pending": "Pending",
+    "provision.status.installing": "Installing",
+    "provision.status.present": "Different version kept",
+    "provision.status.excluded": "Not auto-restored",
+    "provision.versionDiff": "manifest {target} · host {installed}",
+    "provision.action.retry": "Retry failed",
+    "provision.action.retrying": "Retrying…",
+    "provision.toggle": "Auto-provision missing skins",
+    "provision.idle": "Provisioning state is not available yet.",
   },
   zh: {
     "nav.label": "皮肤",
@@ -99,6 +127,20 @@ export const MESSAGES: Record<"en" | "zh", ConsoleMessages> = {
     "empty.hint": "安装遵循换肤公约的皮肤插件后，会出现在这里。",
     "overlay.close": "关闭",
     "footer.open": "皮肤",
+    "provision.title": "皮肤自动补齐",
+    "provision.subtitle": "缺失的公约皮肤会在后台补装；不会切换你当前使用的观感。",
+    "provision.count": "已就绪 {installed}/{total}",
+    "provision.status.installed": "已就绪",
+    "provision.status.failed": "失败",
+    "provision.status.pending": "待安装",
+    "provision.status.installing": "安装中",
+    "provision.status.present": "已有其他版本（保留）",
+    "provision.status.excluded": "不再自动补回",
+    "provision.versionDiff": "清单 {target} · 宿主 {installed}",
+    "provision.action.retry": "重试失败项",
+    "provision.action.retrying": "重试中…",
+    "provision.toggle": "自动补齐缺失皮肤",
+    "provision.idle": "补齐状态尚未就绪。",
   },
 };
 

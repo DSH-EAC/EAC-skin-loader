@@ -1,0 +1,124 @@
+{
+  "manifestVersion": 1,
+  "generatedAt": "2026-10-04T16:48:19.007Z",
+  "releaseSet": "v1.2.0",
+  "skins": [
+    {
+      "name": "@dsh-eac/skin-aurora",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.aurora",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-aurora-1.2.0.tgz",
+      "sha256": "fd9ba5014427b19eca09d3465f73ac64f9717cbd253df741b590d7fc57a49587",
+      "bytes": 13780,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-blue-fantasy",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.blue-fantasy",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-blue-fantasy-1.2.0.tgz",
+      "sha256": "1e2a58165153eb45bc0e63acb45e964d36bff6236667d6c4e542228fd9360d2f",
+      "bytes": 5086191,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-deep-whale-day-night",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.deep-whale-day-night",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-deep-whale-day-night-1.2.0.tgz",
+      "sha256": "7e9d3a826c8a6de802197a4a7aa1a989811ca7c679fe82f85e1fff026d6e998c",
+      "bytes": 7531998,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-dragon-heir",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.dragon-heir",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-dragon-heir-1.2.0.tgz",
+      "sha256": "6e3f1465cf931e0a0733767f16480d62f55e919ba994bd91e43f64c073bdb4f2",
+      "bytes": 179750,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-inkwash",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.inkwash",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-inkwash-1.2.0.tgz",
+      "sha256": "fb14c6ac38496feaf650b84dc6a3c39604498ef96e67d5dd00e76780c7d5fe8a",
+      "bytes": 8727,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-maid-atelier",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.maid-atelier",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-maid-atelier-1.2.0.tgz",
+      "sha256": "51b37292d2915f956a691b87ea7f75aa1755ff4c2dfd36af98444ee979d5adc5",
+      "bytes": 2518394,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-miku",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.miku",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-miku-1.2.0.tgz",
+      "sha256": "ef925bc8ef282bc8c93c17d97b66b242769a0e4e3329b9739ac7e69fe5ea4446",
+      "bytes": 1724809,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-minecraft",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.minecraft",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-minecraft-1.2.0.tgz",
+      "sha256": "44aef64b126ef683b375bd155172c1eebaa2e091f4819a41916ba25427b53099",
+      "bytes": 640905,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-qq98",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.qq98",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-qq98-1.2.0.tgz",
+      "sha256": "356b81ae512cbb0dd91644c61d66515098f0c3d91a75ac5e1df97433b8d0e9e7",
+      "bytes": 860212,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-ths",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.ths",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-ths-1.2.0.tgz",
+      "sha256": "25a5fc0261791eabcad6ced2a7ea0a8fffbb87ffc062f9cbed1089aaef13a1ae",
+      "bytes": 708469,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-trading",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.trading",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-trading-1.2.0.tgz",
+      "sha256": "a51cff9244aba39097e0439a8b35e12f9105f7380f508d0af6da209b9eb73bbe",
+      "bytes": 21900,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-whale-song",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.whale-song",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-whale-song-1.2.0.tgz",
+      "sha256": "214a83dc297279a74d996a73a9a6ab622b041b6c87d2aaf36d85baaedfef71b6",
+      "bytes": 26361,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    },
+    {
+      "name": "@dsh-eac/skin-xp",
+      "version": "1.2.0",
+      "skinId": "dsh-eac.skin.xp",
+      "url": "https://github.com/DSH-EAC/EAC-skin-loader/releases/download/v1.2.0/dsh-eac-skin-xp-1.2.0.tgz",
+      "sha256": "b7f56f6cb2d72140896815c559b015c2b68a85b2851bcbca139f14f721cd0fb2",
+      "bytes": 595915,
+      "dshPeerRange": "0.1.7-rc.2 || 0.2.0-rc.2"
+    }
+  ]
+}

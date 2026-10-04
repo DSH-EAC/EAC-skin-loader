@@ -1,6 +1,6 @@
 # dsh-ui-skin-loader
 
-[![CI](https://github.com/DSH-EAC/dsh-ui-skin-loader/actions/workflows/ci.yml/badge.svg)](https://github.com/DSH-EAC/dsh-ui-skin-loader/actions/workflows/ci.yml)
+[![CI](https://github.com/DSH-EAC/EAC-skin-loader/actions/workflows/ci.yml/badge.svg)](https://github.com/DSH-EAC/EAC-skin-loader/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 **DSH UI 皮肤加载器**——弱约束公约 [`dsh.ecosystem.ui-skin-loader/v1`](https://github.com/DSH-EAC/dsh-ui-skin-loader-convention) 的参考实现：一个加载器加十三款皮肤（2 款内置示例 + 11 款公约化迁移），装入 DSH 后即可在设置里一键换肤、随时彻底还原。
@@ -51,6 +51,26 @@
 
 - [DSH](https://www.npmjs.com/package/@deepseek-ai/dsh) `0.1.7-rc.2` 或 `0.2.0-rc.2`（`dsh` 命令行可用；仅声明这两个精确版本）；
 - Node.js **>= 24**（构建安装包时需要 pnpm 11；安装动作本身由 `dsh` 驱动）。
+
+### 0. Git 安装（推荐：一条命令 + 自动补齐皮肤）
+
+在目标 profile 里直接添加本仓库，加载器即随仓内嵌制品安装（**零构建、零 prepare 脚本**）：
+
+```bash
+dsh plugin --profile web add github:DSH-EAC/EAC-skin-loader
+```
+
+安装后加载器自动启动；它会在后台按 `packages/loader/skin-manifest.json`（固定版本的制品清单，
+含逐包 SHA256 与字节数）**检查并补齐缺失的皮肤**——下载到加载器自有缓存目录、校验通过后经
+宿主 pluginManager 安装，**不会切换你当前使用的观感**，也不会覆盖你已有的任何皮肤/启用状态。
+
+控制台（设置 → 皮肤）底部的「皮肤自动补齐」分区如实展示逐包状态（已就绪 / 安装中 / 失败 /
+已有其他版本 / 不再自动补回），并提供失败重试与自动补齐开关。分发契约、宿主安装机制实测
+与遗留风险见 [`docs/git-distribution.md`](./docs/git-distribution.md)。
+
+> **边界提示**：皮肤制品清单指向 GitHub Release 资产。该 Release 发布前，补齐状态会如实
+> 显示失败原因（网络/404），加载器本体不受影响——类型检查与隔离验证不能代替这一步的
+> 实机验收。
 
 ### 1. 构建安装包
 
@@ -170,8 +190,13 @@ CHANGELOG.md            版本变更记录
 pnpm install        # 安装依赖并生成 lockfile
 pnpm lint           # ESLint（typescript-eslint flat config，递归全部包）
 pnpm test           # node --test 直接运行各包 .test.ts（递归全部包）
-pnpm build          # tsc --noEmit + esbuild-wasm 产出可安装产物（lib/，gitignored）
+pnpm build          # tsc --noEmit + esbuild-wasm 产出可安装产物（加载器 lib/ 已随仓提交，见 docs/git-distribution.md）
 pnpm typecheck      # tsc --noEmit 类型检查（递归全部包）
+
+改动了 `packages/loader/src` 之后必须重新 `pnpm build` 并提交 `packages/loader/lib/`
+（CI 会核对提交制品与重新构建结果逐字节一致——否则 Git 安装会拿到过期的加载器）。
+生成皮肤制品清单：`node packages/loader/scripts/generate-skin-manifest.mjs`（发布前执行，
+见脚本头注）。
 ```
 
 跨包发布契约（包名/皮肤 id/body marker 全局唯一、许可文件入包、SPDX 表达式合法、行 id 与 `cordis.patch.yml` 一致）由 `packages/loader/src/manifest.test.ts` 在 `pnpm test` 中机械守门。

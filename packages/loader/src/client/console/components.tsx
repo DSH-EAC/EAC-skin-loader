@@ -46,6 +46,11 @@ import {
 } from "./messages.ts";
 import { deriveAccentFg } from "./accent.ts";
 import { generatedPreviewSvg, resolvePreviewSvg } from "./preview.ts";
+import {
+  provisioningStatusMessageKey,
+  type ProvisioningItemView,
+  type ProvisioningFacade,
+} from "./provisioning.ts";
 
 /** 控制台共享环境（mount 期构造；React 组件经 context 消费）。 */
 export interface ConsoleEnv {
@@ -59,6 +64,8 @@ export interface ConsoleEnv {
   localeRevision: SnapshotStore<number>;
   /** 浮层展开状态 store（侧栏入口 ↔ shell.overlay 共享；双方可写）。 */
   overlayOpen: WritableSnapshotStore<boolean>;
+  /** 皮肤补齐投影面（host settings `provisioning` 段只读投影 + 开关/重试写路径）。 */
+  provisioning: ProvisioningFacade;
 }
 
 interface ConsoleContextValue {
@@ -285,7 +292,119 @@ export function SkinConsole({ hideHeader = false }: { hideHeader?: boolean }): R
           ))}
         </div>
       )}
+
+      <ProvisioningPanel />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 皮肤自动补齐状态（docs/git-distribution.md §3.5；计划 §三.4 最小状态界面）
+// ---------------------------------------------------------------------------
+
+function ProvisioningPanel(): ReactNode {
+  const { env, t } = useConsole();
+  const facade = env.provisioning;
+  const mounted = useMounted();
+  const view = useSyncExternalStore(facade.subscribe, facade.snapshot);
+  const [busy, setBusy] = useState<"toggle" | "retry" | null>(null);
+
+  const handleToggle = useCallback(async () => {
+    if (busy !== null) return;
+    setBusy("toggle");
+    try {
+      await facade.setEnabled(!view.enabled);
+    } finally {
+      if (mounted.current) setBusy(null);
+    }
+  }, [facade, view.enabled, busy, mounted]);
+
+  const handleRetry = useCallback(async () => {
+    if (busy !== null || view.counts.failed === 0) return;
+    setBusy("retry");
+    try {
+      await facade.requestRetry();
+    } finally {
+      if (mounted.current) setBusy(null);
+    }
+  }, [facade, view.counts.failed, busy, mounted]);
+
+  // host 半未挂载/未运行补齐器：如实呈现「状态不可用」，不假装一切就绪。
+  if (!view.available) {
+    return (
+      <section className="usl-provision" data-usl-role="provision" data-usl-available="false">
+        <h4 className="usl-section-title">{t("provision.title")}</h4>
+        <p className="usl-provision-idle" data-usl-role="provision-idle">
+          {t("provision.idle")}
+        </p>
+      </section>
+    );
+  }
+
+  const total = view.items.length;
+  return (
+    <section className="usl-provision" data-usl-role="provision" data-usl-available="true">
+      <h4 className="usl-section-title">
+        {t("provision.title")}
+        <span className="usl-count">
+          {formatTemplate(t("provision.count"), { installed: view.counts.installed, total })}
+        </span>
+      </h4>
+      <p className="usl-provision-subtitle">{t("provision.subtitle")}</p>
+      <ul className="usl-provision-list" data-usl-role="provision-list">
+        {view.items.map((item) => (
+          <ProvisioningItem key={item.name} item={item} t={t} />
+        ))}
+      </ul>
+      <div className="usl-provision-actions">
+        <label className="usl-provision-toggle">
+          <input
+            type="checkbox"
+            checked={view.enabled}
+            disabled={busy !== null}
+            onChange={() => void handleToggle()}
+            data-usl-role="provision-toggle"
+          />
+          <span>{t("provision.toggle")}</span>
+        </label>
+        {view.counts.failed > 0 && (
+          <button
+            type="button"
+            className="usl-btn"
+            disabled={busy !== null}
+            onClick={() => void handleRetry()}
+            data-usl-role="provision-retry"
+          >
+            {busy === "retry" ? t("provision.action.retrying") : t("provision.action.retry")}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ProvisioningItem({ item, t }: { item: ProvisioningItemView; t: Translate }): ReactNode {
+  const shortName = item.name.replace(/^@/, "");
+  return (
+    <li className="usl-provision-item" data-usl-provision-status={item.status} data-usl-provision-name={item.name}>
+      <span className="usl-provision-name">{shortName}</span>
+      <span className="usl-provision-badge" data-usl-role="provision-badge">
+        {t(provisioningStatusMessageKey(item.status))}
+      </span>
+      {item.status === "present" && item.installedVersion !== undefined && (
+        <span className="usl-provision-meta" data-usl-role="provision-version-diff">
+          {formatTemplate(t("provision.versionDiff"), {
+            target: item.targetVersion,
+            installed: item.installedVersion,
+          })}
+        </span>
+      )}
+      {item.error !== undefined && item.status === "failed" && (
+        <span className="usl-provision-error" data-usl-role="provision-error">
+          {item.error}
+        </span>
+      )}
+    </li>
   );
 }
 

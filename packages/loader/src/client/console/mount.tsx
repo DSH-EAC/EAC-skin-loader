@@ -23,6 +23,7 @@ import type { Disposer, SkinRuntime } from "../../protocol.ts";
 import type { ConsoleEnv } from "./components.tsx";
 import { ConsoleEnvProvider, FooterAction, OverlayHost, SettingsSection } from "./components.tsx";
 import { createFlagStore, createLocaleRevisionStore, createSchemeStore } from "./env.ts";
+import { createProvisioningFacade } from "./provisioning.ts";
 import { CONSOLE_ENTRY_ID, CONSOLE_LOCALE_NS, MESSAGES } from "./messages.ts";
 import { ensureConsoleStyles } from "./styles.ts";
 
@@ -76,7 +77,10 @@ export function createConsoleController(options: ConsoleControllerOptions): Cons
     // ---- 浮层展开旗标（侧栏入口 ↔ shell.overlay 共享）
     const overlayOpen = createFlagStore(false);
 
-    const env: ConsoleEnv = { runtime, t, scheme, localeRevision, overlayOpen };
+    // ---- 皮肤补齐投影（host settings `provisioning` 段；只读投影 + 开关/重试写路径）
+    const provisioning = createProvisioningFacade(adapter);
+
+    const env: ConsoleEnv = { runtime, t, scheme, localeRevision, overlayOpen, provisioning };
 
     // 给槽位组件包一层 ConsoleEnvProvider（三处槽位 = 三棵独立 React 子树）。
     // 注意必须以「元素」形态渲染 Component（不能函数直调 Component(props)）——

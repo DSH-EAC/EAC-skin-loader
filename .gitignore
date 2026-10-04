@@ -3,3 +3,6 @@ dist/
 .verify/
 .superpowers/
 lib/
+# Git 分发契约（docs/git-distribution.md §3.3）：加载器构建产物随仓内嵌——
+# github: 默认安装零构建，根包 files 白名单从这里取 host/client 入口。
+!packages/loader/lib/

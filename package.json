@@ -1,9 +1,10 @@
 {
-  "name": "dsh-ui-skin-loader",
-  "version": "0.0.0",
+  "name": "@dsh-eac/skin-loader-pack",
+  "version": "1.2.0",
   "private": true,
   "license": "MIT",
   "type": "module",
+  "description": "DSH UI 皮肤加载器 Git 分发组合包：以仓内固定制品经 patch 挂载 @dsh-eac/ui-skin-loader（分发契约见 docs/git-distribution.md）。",
   "engines": {
     "node": ">=24"
   },
@@ -13,6 +14,29 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"
   },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": "0.1.7-rc.2 || 0.2.0-rc.2"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "~3.18.4"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "packages/loader/lib",
+    "packages/loader/cordis.patch.yml",
+    "packages/loader/package.json",
+    "packages/loader/skin-manifest.json",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@types/node": "^24.0.0",

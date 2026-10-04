@@ -9,6 +9,12 @@
 export interface Timers {
   setTimeout(fn: () => void, ms: number): unknown;
   clearTimeout(handle: unknown): void;
+  /**
+   * 间隔句柄（可选：补齐器 settings 轮询用）。测试 fake 时钟可不实现——
+   * 注入 fake 的测试自行驱动周期逻辑，或显式提供 interval。
+   */
+  setInterval?(fn: () => void, ms: number): unknown;
+  clearInterval?(handle: unknown): void;
 }
 
 /** 生产默认：globalThis 定时器（Node 24 / 浏览器同形）。 */
@@ -18,6 +24,12 @@ export const defaultTimers: Timers = {
   },
   clearTimeout(handle) {
     globalThis.clearTimeout(handle as Parameters<typeof globalThis.clearTimeout>[0]);
+  },
+  setInterval(fn, ms) {
+    return globalThis.setInterval(fn, ms);
+  },
+  clearInterval(handle) {
+    globalThis.clearInterval(handle as Parameters<typeof globalThis.clearInterval>[0]);
   },
 };
 

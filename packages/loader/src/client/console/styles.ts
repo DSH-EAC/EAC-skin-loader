@@ -327,6 +327,92 @@ export const CONSOLE_CSS = String.raw`
   line-height: 1;
   padding: 0 2px;
 }
+/* ---- 皮肤自动补齐（docs/git-distribution.md §3.5 最小状态界面）---- */
+.usl-provision {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+.usl-provision-subtitle {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.5;
+}
+.usl-provision-idle {
+  margin: 6px 0 0;
+  font-size: 12px;
+  opacity: 0.7;
+}
+.usl-provision-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.usl-provision-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+.usl-provision-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  opacity: 0.85;
+}
+.usl-provision-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+}
+.usl-provision-item[data-usl-provision-status="installed"] .usl-provision-badge {
+  color: #0f7b55;
+  border-color: color-mix(in srgb, #0f7b55 45%, transparent);
+}
+.usl-provision-item[data-usl-provision-status="failed"] .usl-provision-badge {
+  color: #b3261e;
+  border-color: color-mix(in srgb, #b3261e 45%, transparent);
+}
+.usl-provision-item[data-usl-provision-status="installing"] .usl-provision-badge,
+.usl-provision-item[data-usl-provision-status="pending"] .usl-provision-badge {
+  opacity: 0.85;
+}
+.usl-provision-meta {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.usl-provision-error {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: #b3261e;
+  word-break: break-word;
+}
+.usl-provision-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.usl-provision-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.usl-provision-toggle input {
+  accent-color: currentColor;
+}
+
 .usl-empty {
   border: 1px dashed var(--usl-border);
   border-radius: 10px;

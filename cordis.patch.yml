@@ -1,0 +1,15 @@
+# Git 分发组合包 @dsh-eac/skin-loader-pack 的 bundle patch 层（docs/git-distribution.md §3.2）。
+#
+# 本包是 github:DSH-EAC/EAC-skin-loader 默认安装的入口：dsh.profile.bundles 追加本包名，
+# boot 组合本 patch。行 id `dsh-ui-skin-loader` == settings 命名空间（公约保留面，不改）。
+#
+# 行 name 用相对路径指向仓内固定制品（packages/loader/lib/index.js）——
+# git 安装包内任何形式的子依赖（file/URL/git）都被宿主 pnpm 配置拒绝
+# （blockExoticSubdeps / 相对 file: 按 profile 目录解析 / prepare 被拦，docs/git-distribution.md §2），
+# 因此加载器制品必须随本仓内嵌，而不是声明依赖。
+# client-modules 以该路径上溯最近 package.json（packages/loader/package.json，name
+# `@dsh-eac/ui-skin-loader`）取得 dsh.client 与 ./client 导出 → boot graph 行 id 与
+# 浏览器 bundle id 一致（实机核对，docs/git-distribution.md §5）。
+- insert:
+    - id: dsh-ui-skin-loader
+      name: "./packages/loader/lib/index.js"
