@@ -2,12 +2,13 @@
 
 本项目的全部显著改动记录于此。版本遵循 [SemVer 2.0.0](https://semver.org/lang/zh-CN/)。
 
-## 未发布
+## 1.2.0 — 2026-10-05
 
 - **Git 分发入口**（`docs/git-distribution.md`）：仓库根改为可安装组合包 `@dsh-eac/skin-loader-pack`——`dsh plugin add github:DSH-EAC/EAC-skin-loader` 不再落到没有 `dsh.bundle` 的开发清单；加载器构建产物 `packages/loader/lib` 随仓内嵌（CI 核对提交制品与重新构建逐字节一致），默认安装零构建、零 prepare 脚本。
 - **皮肤自动补齐**：加载器 host 半新增补齐器——按固定版本制品清单（`packages/loader/skin-manifest.json`，由发布管线从真实 tarball 生成，含逐包 SHA256/字节数）后台检查并补齐缺失皮肤；下载到加载器自有缓存目录、字节数 + SHA256 双校验、原子落盘，经宿主 pluginManager 串行安装（不自行执行 pnpm、不直写 profile 清单）；新装皮肤由宿主自动启用并登记，**从不切换当前观感**。失败如实透传原因、累计尝试有上限、网络故障不阻断加载器启动。
 - **补齐状态策略**：安装状态与激活状态分字段存储（`provisioning` vs `activeSkin`）；区分已就绪 / 安装中 / 待安装 / 失败 / 已有其他版本（不覆盖，展示差异）/ 不再自动补回（用户补齐后卸载的皮肤不强制补回）；reload/重启/多窗口不产生重复安装任务。
 - **控制台**：设置 → 皮肤底部新增「皮肤自动补齐」最小分区——逐包状态、失败重试与自动补齐开关（zh/en 双语）。
+- **补齐器与宿主深合并语义适配**：retry 指令消费改为可覆盖标记（宿主 `settings.update` 为 mergeLayers 深合并，空对象写不掉旧键）；状态字段退出改空串复位；显式重试与自动补齐开关的例外语义对齐（详见 `docs/git-distribution.md` §2）。
 
 - 加载器和全部 13 款皮肤的宿主声明增加精确版本 `0.2.0-rc.2`，继续支持 `0.1.7-rc.2`；未扩大到其他预发布版本。
 - 加载器和全部 13 款皮肤的包版本统一递增至 `1.2.0`，同步更新皮肤 manifest、运行时 identity、测试断言和安装示例。
