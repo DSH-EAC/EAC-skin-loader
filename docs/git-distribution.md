@@ -27,6 +27,7 @@ dsh: warning: dsh-ui-skin-loader declares no dsh.bundle — installed as a plain
 | git-hosted `prepare` 被 pnpm 拦截 | 安装失败提示「add the exact key … under allowBuilds」→ 不能把构建寄托在 prepare 上（与计划 §三.1 一致） |
 | `files` 白名单对 git 安装生效 | 实测安装产物只含 `files` 列出的路径 → 产物必须**提交进 git** |
 | client-modules 的 `nearestPackage` 身份匹配 | 解析文件的最近 `package.json` 的 `name` 必须与 patch 行 `name` 完全一致 → `packages/loader/package.json` 的 name **不可改** |
+| host `settings.update` 是**深合并** | `dsh-settings/lib/index.js` `mergeLayers`（L281）：对象字段逐键合并、**空对象写不掉旧键**；revision 仅在序列化值变化时 +1。补齐器的指令消费与状态写入必须按「可覆盖键值 + 空串复位」设计，不能依赖 delete/置空清除（provisioner 据此实现，provisioner.test.ts 的 fake 与该语义同形） |
 
 **结论**：计划 §四.1 的首选形态「独立命名的根目录组合包，**依赖**固定的加载器制品」在宿主 pnpm 配置下
 **不可能**——任何形式的子依赖（file/URL/git）都会被上述三条约束拦下。可行替代是同一思想的变体：

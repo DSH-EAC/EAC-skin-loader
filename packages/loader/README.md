@@ -12,7 +12,7 @@ DSH UI 皮肤加载器 —— 弱约束公约 [`dsh.ecosystem.ui-skin-loader/v1`
 dsh plugin --profile web add <dist>/dsh-eac-ui-skin-loader-1.2.0.tgz
 ```
 
-皮肤包依赖本加载器，建议先装加载器再逐个安装皮肤包。完整的构建、安装与验证说明见仓库根 [`README.md`](https://github.com/DSH-EAC/dsh-ui-skin-loader#readme)，宿主 API 实测依据见 `docs/api-notes.md`，验证战役证据见 `docs/verification.md`。
+皮肤包依赖本加载器，建议先装加载器再逐个安装皮肤包。完整的构建、安装与验证说明见仓库根 [`README.md`](https://github.com/DSH-EAC/EAC-skin-loader#readme)，宿主 API 实测依据见 `docs/api-notes.md`，验证战役证据见 `docs/verification.md`。
 
 新版沿用同形 adapter，不更改 `activeSkin` 或 `default` 的语义。`0.2.0-rc.2` 的本地契约测试不替代 Desktop 界面、跨重启和视觉验收。
 

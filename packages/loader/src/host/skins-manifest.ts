@@ -12,8 +12,8 @@
 /** 皮肤 id 正则（与 protocol.ts / 公约 §3 同一形态；此处独立声明避免 host 半引入 client 面）。 */
 const SKIN_ID_PATTERN = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 
-/** npm 包名（scope 可选）；补齐器用它派生缓存文件名，字符集必须可安全入路径。 */
-const PACKAGE_NAME_PATTERN = /^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$|^@[a-z0-9][a-z0-9._-]*$/;
+/** npm 包名（必须带 scope——公约皮肤统一为 @dsh-eac/*；补齐器用它派生缓存文件名，字符集必须可安全入路径）。 */
+const PACKAGE_NAME_PATTERN = /^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/;
 
 /** 十六进制 SHA256（小写）。 */
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;

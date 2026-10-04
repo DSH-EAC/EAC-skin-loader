@@ -304,15 +304,15 @@ function createSkinProvisioner(options) {
           if (item.status === "failed") {
             item.status = "pending";
             item.attempts = 0;
-            delete item.error;
+            item.error = "";
             item.updatedAt = timestamp();
             stateDirty = true;
           }
         }
-      }
-      if (command !== null) {
         await raceTimeout(
-          settings.update(namespace, { provisionCommand: {} }),
+          settings.update(namespace, {
+            provisionCommand: { kind: "consumed", at: timestamp() }
+          }),
           STATE_WRITE_TIMEOUT_MS,
           timers
         );
@@ -346,7 +346,7 @@ function createSkinProvisioner(options) {
           if (item.status === "installed" || item.status === "present") {
             item.status = "excluded";
             item.updatedAt = timestamp();
-            delete item.installedVersion;
+            item.installedVersion = "";
             state.items[artifact.name] = item;
             stateDirty = true;
             logger.info("skin was removed by the user after provisioning; excluded from auto-provision", {
@@ -369,7 +369,7 @@ function createSkinProvisioner(options) {
           if (item.status !== "installed" || item.installedVersion !== bundle.version) {
             item.status = "installed";
             item.installedVersion = bundle.version;
-            delete item.error;
+            item.error = "";
             item.updatedAt = timestamp();
             state.items[artifact.name] = item;
             stateDirty = true;
@@ -398,7 +398,7 @@ function createSkinProvisioner(options) {
       for (const artifact of pending) {
         if (disposed) break;
         const current = readNamespaceSnapshot(settings, namespace);
-        if (current && isPlainObject2(current.value) && current.value.autoProvision === false) {
+        if (!explicitRetry && current && isPlainObject2(current.value) && current.value.autoProvision === false) {
           logger.info("auto-provision disabled mid-run; stopping", {});
           break;
         }
@@ -420,7 +420,7 @@ function createSkinProvisioner(options) {
           }
           item.status = "installed";
           item.installedVersion = installed.version ?? artifact.version;
-          delete item.error;
+          item.error = "";
           logger.info("skin provisioned", { name: artifact.name, version: item.installedVersion });
         } catch (error) {
           const message = describeFailure(error);
@@ -489,7 +489,7 @@ function sha256Hex(bytes) {
 
 // src/host/skins-manifest.ts
 var SKIN_ID_PATTERN = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
-var PACKAGE_NAME_PATTERN = /^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$|^@[a-z0-9][a-z0-9._-]*$/;
+var PACKAGE_NAME_PATTERN = /^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/;
 var SHA256_PATTERN = /^[0-9a-f]{64}$/;
 var SKINS_MANIFEST_VERSION = 1;
 function isPlainObject3(value) {
@@ -652,8 +652,10 @@ function apply(ctx) {
     if (!manager) return;
     child.effect(
       () => {
+        let disposed = false;
         let disposer = null;
         void loadSkinsManifest(SKINS_MANIFEST_URL).then((parsed) => {
+          if (disposed) return;
           if (!parsed.ok) {
             console.error(`[ui-skin-loader] skin provisioning disabled: ${parsed.error}`);
             return;
@@ -667,6 +669,7 @@ function apply(ctx) {
           }).start();
         });
         return () => {
+          disposed = true;
           disposer?.();
         };
       },

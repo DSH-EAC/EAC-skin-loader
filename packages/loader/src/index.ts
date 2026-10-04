@@ -74,8 +74,12 @@ export function apply(ctx: Dsh017HostContext): void {
     if (!manager) return;
     child.effect(
       () => {
+        let disposed = false;
         let disposer: (() => void) | null = null;
         void loadSkinsManifest(SKINS_MANIFEST_URL).then((parsed) => {
+          // 清单加载是异步的：unload 可能先到。已卸载的 fiber 上不得再启动补齐器，
+          // 否则留下一个无人管理（disposer 已被丢弃）的孤儿轮询，甚至继续安装。
+          if (disposed) return;
           if (!parsed.ok) {
             // 清单缺失/非法 = fail-closed：如实上报，不猜测、不装任何东西。
             console.error(`[ui-skin-loader] skin provisioning disabled: ${parsed.error}`);
@@ -90,6 +94,7 @@ export function apply(ctx: Dsh017HostContext): void {
           }).start();
         });
         return () => {
+          disposed = true;
           disposer?.();
         };
       },

@@ -299,22 +299,26 @@ export function createSkinProvisioner(options: SkinProvisionerOptions): SkinProv
       let explicitRetry = false;
 
       // ---- 用户指令（client 半控制台写入）：retry = 失败项重置为 pending（重置累计尝试）。
+      // 只认 kind === "retry"；其余（缺省 {}、已消费标记）一律忽略且**不写 settings**——
+      // 宿主 dsh-settings 的 update 是 mergeLayers 深合并（docs/git-distribution.md §2），
+      // 空对象写不掉旧键，每轮无条件写只会留下永远有效的旧指令或制造无谓 revision 变化。
       if (command && command.kind === "retry") {
         explicitRetry = true;
         for (const item of Object.values(state.items)) {
           if (item.status === "failed") {
             item.status = "pending";
             item.attempts = 0;
-            delete item.error;
+            item.error = "";
             item.updatedAt = timestamp();
             stateDirty = true;
           }
         }
-      }
-      if (command !== null) {
-        // 指令消费后清除（一次性；写空对象 = 字段清空）。
+        // 消费标记：深合并语义下没有「写空对象清除」这条路，用**可覆盖的键值**把
+        // kind 覆盖成非 retry 值——同一条指令不会被消费两次（字段替换语义下同样成立）。
         await raceTimeout(
-          settings.update(namespace, { provisionCommand: {} }),
+          settings.update(namespace, {
+            provisionCommand: { kind: "consumed", at: timestamp() },
+          }),
           STATE_WRITE_TIMEOUT_MS,
           timers,
         );
@@ -355,7 +359,9 @@ export function createSkinProvisioner(options: SkinProvisionerOptions): SkinProv
             // 用户在补齐成功后卸载：尊重用户决定，不自动补回（计划 §四.3）。
             item.status = "excluded";
             item.updatedAt = timestamp();
-            delete item.installedVersion;
+            // 空串复位而非 delete：settings.update 深合并删不掉已存在的键，
+            // 空串经 normalizeProvisioningState 视同缺失（读回即干净）。
+            item.installedVersion = "";
             state.items[artifact.name] = item;
             stateDirty = true;
             logger.info("skin was removed by the user after provisioning; excluded from auto-provision", {
@@ -381,7 +387,8 @@ export function createSkinProvisioner(options: SkinProvisionerOptions): SkinProv
           if (item.status !== "installed" || item.installedVersion !== bundle.version) {
             item.status = "installed";
             item.installedVersion = bundle.version;
-            delete item.error;
+            // 空串复位而非 delete：同上，深合并语义下 delete 不可达 settings。
+            item.error = "";
             item.updatedAt = timestamp();
             state.items[artifact.name] = item;
             stateDirty = true;
@@ -411,9 +418,13 @@ export function createSkinProvisioner(options: SkinProvisionerOptions): SkinProv
       let progressed = false;
       for (const artifact of pending) {
         if (disposed) break;
-        // 每个制品安装前重读开关（用户可在中途关闭）。
+        // 每个制品安装前重读开关（用户可在中途关闭）。显式 retry 例外：它是用户本轮
+        // 亲自发起的动作，与 reconcile 侧的 explicitRetry 例外一致；自动任务仍被拦。
         const current = readNamespaceSnapshot(settings, namespace);
-        if (current && isPlainObject(current.value) && current.value.autoProvision === false) {
+        if (
+          !explicitRetry &&
+          current && isPlainObject(current.value) && current.value.autoProvision === false
+        ) {
           logger.info("auto-provision disabled mid-run; stopping", {});
           break;
         }
@@ -437,7 +448,8 @@ export function createSkinProvisioner(options: SkinProvisionerOptions): SkinProv
           }
           item.status = "installed";
           item.installedVersion = installed.version ?? artifact.version;
-          delete item.error;
+          // 空串复位而非 delete：深合并语义下 delete 不可达 settings，读回靠 normalize 清。
+          item.error = "";
           logger.info("skin provisioned", { name: artifact.name, version: item.installedVersion });
         } catch (error) {
           const message = describeFailure(error);

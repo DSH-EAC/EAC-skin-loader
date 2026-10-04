@@ -69,7 +69,29 @@ interface FakeHostState {
   revision: number;
 }
 
-/** host 侧 settings 服务的内存实现（describe/update 形态与 dsh-settings 一致）。 */
+/**
+ * 与宿主 dsh-settings 的 mergeLayers 同形（lib/index.js L281）：对象字段逐键**深合并**，
+ * 不是字段级替换——空对象清不掉已存在的键。fake 必须复刻这一点，否则会掩盖
+ * 「retry 指令清除无效」这类只在真实宿主上复现的缺陷（本轮修复的回归来源）。
+ */
+function deepMerge(
+  under: Record<string, unknown>,
+  over: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...under };
+  for (const [key, value] of Object.entries(over)) {
+    const current = merged[key];
+    const bothPlainObjects =
+      current !== null && typeof current === "object" && !Array.isArray(current) &&
+      value !== null && typeof value === "object" && !Array.isArray(value);
+    merged[key] = bothPlainObjects
+      ? deepMerge(current as Record<string, unknown>, value as Record<string, unknown>)
+      : value;
+  }
+  return merged;
+}
+
+/** host 侧 settings 服务的内存实现（describe/update 语义与 dsh-settings 一致：深合并）。 */
 function fakeSettings(initial: Record<string, unknown> = {}) {
   const state: FakeHostState = { value: { ...initial }, revision: 1 };
   return {
@@ -78,7 +100,7 @@ function fakeSettings(initial: Record<string, unknown> = {}) {
       return [{ ns: "dsh-ui-skin-loader", value: state.value, revision: state.revision }];
     },
     async update(_ns: string, patch: Record<string, unknown>) {
-      state.value = { ...state.value, ...patch };
+      state.value = deepMerge(state.value, patch);
       state.revision += 1;
     },
   };
@@ -427,7 +449,7 @@ test("network failure does not prevent other skins from provisioning", async () 
   }
 });
 
-test("total attempts are capped; an explicit retry command resets them", async () => {
+test("total attempts are capped; an explicit retry command resets them exactly once", async () => {
   const h = await createHarness({
     bodies: {
       "http://cache.test/dsh-eac-skin-aurora-1.2.0.tgz": new Error("boom"),
@@ -443,14 +465,62 @@ test("total attempts are capped; an explicit retry command resets them", async (
     assert.equal(state?.items["@dsh-eac/skin-aurora"]?.attempts, 2);
     assert.equal(state?.items["@dsh-eac/skin-aurora"]?.status, "failed");
 
-    // 用户点「重试失败项」→ 指令消费 + attempts 归零重新进入 pending。
+    // 用户点「重试失败项」→ 指令消费（kind → "consumed"）+ attempts 归零重新进入 pending。
     h.settings.state.value.provisionCommand = { kind: "retry", at: "now" };
     h.settings.state.revision += 1;
     await h.runOnce();
     state = readProvisioningState(h.settings.state.value);
-    assert.deepEqual(h.settings.state.value.provisionCommand, {});
+    // 回归（真实宿主深合并语义）：指令必须被覆盖为已消费，而不是残留 kind:"retry"。
+    const command = h.settings.state.value.provisionCommand as { kind?: string } | undefined;
+    assert.equal(command?.kind, "consumed");
     assert.equal(state?.items["@dsh-eac/skin-aurora"]?.status, "failed");
     assert.equal(state?.items["@dsh-eac/skin-aurora"]?.attempts, 1);
+    // aurora 下载必败 → installBundle 永不触达；计数里只有 xp 首轮那一次成功安装。
+    assert.equal(h.manager.installCalls.length, 1);
+
+    // 后续 cycle（无新指令）：累计上限内的自动重试恰好一次（attempts 1→2），
+    // 然后停 failed——残留的旧指令不得再次重置 attempts（无限重试回归）。
+    await h.runOnce();
+    state = readProvisioningState(h.settings.state.value);
+    assert.equal(state?.items["@dsh-eac/skin-aurora"]?.attempts, 2);
+    assert.equal(h.manager.installCalls.length, 1);
+
+    await h.runOnce();
+    state = readProvisioningState(h.settings.state.value);
+    assert.equal(state?.items["@dsh-eac/skin-aurora"]?.status, "failed");
+    assert.equal(state?.items["@dsh-eac/skin-aurora"]?.attempts, 2);
+    assert.equal(h.manager.installCalls.length, 1);
+  } finally {
+    await h.cleanup();
+  }
+});
+
+test("a consumed retry command neither retries again nor bypasses the autoProvision toggle", async () => {
+  const h = await createHarness({
+    bodies: {
+      "http://cache.test/dsh-eac-skin-aurora-1.2.0.tgz": new Error("boom"),
+      "http://cache.test/dsh-eac-skin-xp-1.2.0.tgz": new TextEncoder().encode("xp-tarball-bytes"),
+    },
+    maxTotalAttempts: 2,
+  });
+  try {
+    await h.runOnce();
+    await h.runOnce(); // aurora attempts=2 → capped failed
+    // 用户点了重试，随后立刻关掉自动补齐开关。
+    h.settings.state.value.provisionCommand = { kind: "retry", at: "t1" };
+    h.settings.state.value.autoProvision = false;
+    h.settings.state.revision += 1;
+    await h.runOnce(); // 显式 retry：消费指令、重置并尝试一次（attempts 0→1；xp 已装，计数不变）
+    assert.equal(h.manager.installCalls.length, 1);
+    const state = readProvisioningState(h.settings.state.value);
+    assert.equal(state?.items["@dsh-eac/skin-aurora"]?.attempts, 1);
+
+    // 之后每轮都必须被「开关关闭 + 无有效指令」拦下：不再有新尝试。
+    await h.runOnce();
+    await h.runOnce();
+    assert.equal(h.manager.installCalls.length, 1);
+    const later = readProvisioningState(h.settings.state.value);
+    assert.equal(later?.items["@dsh-eac/skin-aurora"]?.attempts, 1);
   } finally {
     await h.cleanup();
   }

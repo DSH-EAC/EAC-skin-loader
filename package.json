@@ -32,10 +32,12 @@
     "packages/loader/cordis.patch.yml",
     "packages/loader/package.json",
     "packages/loader/skin-manifest.json",
+    "packages/loader/README.md",
+    "packages/loader/LICENSE",
+    "packages/loader/NOTICE",
+    "packages/loader/THIRD-PARTY-NOTICES.md",
     "README.md",
-    "LICENSE",
-    "NOTICE",
-    "THIRD-PARTY-NOTICES.md"
+    "LICENSE"
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.0",
