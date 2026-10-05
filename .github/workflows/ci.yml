@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  # PR 自动触发已停用（DSH-EAC 组织决定）：CI 只由 push 到 main 触发。
 
 jobs:
   ci:
