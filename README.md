@@ -1,4 +1,6 @@
-# dsh-ui-skin-loader
+<h1 align="center">
+  <img src="docs/assets/EAC-skin-loader.svg" alt="dsh-ui-skin-loader" width="808" />
+</h1>
 
 [![CI](https://github.com/DSH-EAC/EAC-skin-loader/actions/workflows/ci.yml/badge.svg)](https://github.com/DSH-EAC/EAC-skin-loader/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
