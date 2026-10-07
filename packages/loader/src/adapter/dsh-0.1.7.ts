@@ -141,8 +141,16 @@ export function composeDisposers(disposers: Iterable<Disposer>): Disposer {
       return;
     }
     disposed = true;
+    const errors: unknown[] = [];
     for (let i = list.length - 1; i >= 0; i--) {
-      list[i]?.();
+      try {
+        list[i]?.();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, `disposer cleanup failed: ${errors.map(String).join("; ")}`);
     }
   };
 }

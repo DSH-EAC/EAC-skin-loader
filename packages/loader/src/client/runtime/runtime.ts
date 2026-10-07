@@ -68,6 +68,7 @@ interface ActiveRecord {
   controller: AbortController;
   /** 激活期经 SkinSlotHandle 登记的席位，逆序撤除。 */
   disposers: Disposer[];
+  cleanupWarnings: string[];
   deactivateStarted: boolean;
   /**
    * 关闭封账标记：shutdownActive 一旦开始，此后 SkinSlotHandle 的任何登记
@@ -221,17 +222,27 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
     record.closed = true;
     record.deactivateStarted = true;
     record.controller.abort(`skin "${record.entry.reg.id}" was unregistered while active (host-side disable/uninstall)`);
-    for (const off of [...record.disposers].reverse()) {
+    releaseLedger(record);
+  }
+
+  function reportLedgerFailure(record: ActiveRecord, error: unknown): void {
+    const skinId = record.entry.reg.id;
+    const message = `slot cleanup of skin "${skinId}" threw: ${describeError(error)}; marked suspect-residue`;
+    record.entry.marks.add("suspect-residue");
+    record.cleanupWarnings.push(message);
+    logger.warn(message);
+    void appendFault({ at: timestamp(), skinId, kind: "deactivate-failed", message });
+  }
+
+  function releaseLedger(record: ActiveRecord): void {
+    const disposers = record.disposers.splice(0);
+    for (const off of disposers.reverse()) {
       try {
         off();
-      } catch (error) {
-        logger.warn("slot disposer threw during ledger revocation", {
-          skinId: record.entry.reg.id,
-          error: describeError(error),
-        });
+      } catch {
+        // Tracked releases report their own failure; continue with the remaining leases.
       }
     }
-    record.disposers.length = 0;
   }
 
   /**
@@ -356,31 +367,43 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
 
   // ------------------------------------------------------------ 激活/关闭
   function createSkinContext(reg: SkinRegistration, signal: AbortSignal, record: ActiveRecord): SkinContext {
-    /** 封账后的登记立即撤除并返回 no-op disposer（挂死激活恢复后的补注册不得残留）。 */
+    const canRegister = (): boolean => !record.closed && !signal.aborted;
     function track(off: Disposer): Disposer {
-      if (record.closed) {
+      let released = false;
+      const release = (): void => {
+        if (released) return;
+        released = true;
+        const index = record.disposers.indexOf(release);
+        if (index !== -1) record.disposers.splice(index, 1);
         try {
           off();
         } catch (error) {
-          logger.warn("late slot registration after shutdown was disposed with an error", {
-            skinId: reg.id,
-            error: describeError(error),
-          });
+          reportLedgerFailure(record, error);
+          throw error;
         }
+      };
+      // An upstream registration can synchronously trigger shutdown before returning.
+      if (!canRegister()) {
+        try { release(); } catch { /* Failure was reported by the tracked release. */ }
         return () => undefined;
       }
-      record.disposers.push(off);
-      return off;
+      record.disposers.push(release);
+      return release;
     }
     return {
       logger: createSkinLogger(reg.id),
       signal,
       slots: {
         register(componentOptions, component) {
+          if (!canRegister()) return () => undefined;
           return track(adapter.slots.register(componentOptions, component));
         },
         inject(key, callback) {
-          return track(adapter.slots.inject(key, callback));
+          if (!canRegister()) return () => undefined;
+          return track(adapter.slots.inject(key, () => {
+            if (!canRegister()) return;
+            return callback();
+          }));
         },
       },
     };
@@ -420,17 +443,8 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
       }
     }
     // 兜底：SkinSlotHandle 记账的席位逆序撤除（公约 §4.3「退出后不可观测」的加载器侧保障）。
-    for (const off of [...record.disposers].reverse()) {
-      try {
-        off();
-      } catch (error) {
-        logger.warn("slot disposer threw during shutdown", {
-          skinId,
-          error: describeError(error),
-        });
-      }
-    }
-    record.disposers.length = 0;
+    releaseLedger(record);
+    warnings.push(...record.cleanupWarnings);
     currentId = DEFAULT_SKIN_ID;
     notify();
     return { warning: warnings.length > 0 ? warnings.join("; ") : undefined };
@@ -570,6 +584,7 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
         entry: targetEntry,
         controller,
         disposers: [],
+        cleanupWarnings: [],
         deactivateStarted: false,
         closed: false,
       };
@@ -604,6 +619,17 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
         }
         await persist(DEFAULT_SKIN_ID, warnings);
         return { ...supersededResult(), warning: joinWarnings(warnings) };
+      }
+      if (record.closed || active !== record) {
+        const rolled = active === record ? await shutdownActive() : {};
+        if (rolled.warning) warnings.push(rolled.warning);
+        await persist(DEFAULT_SKIN_ID, warnings);
+        return {
+          ok: false,
+          error: `activation of skin "${target}" was closed before commit`,
+          warning: joinWarnings(warnings),
+          rolledBackTo: currentId,
+        };
       }
       if (outcome.kind === "timeout") {
         controller.abort(`activation of skin "${target}" timed out after ${activateMs}ms`);
@@ -843,10 +869,18 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
         grace.settled = true;
         grace = null;
       }
-      syncOff?.();
+      const listenerDisposers = [syncOff, syncFormOff];
       syncOff = null;
-      syncFormOff?.();
       syncFormOff = null;
+      for (const off of listenerDisposers.reverse()) {
+        try {
+          off?.();
+        } catch (error) {
+          const message = `runtime listener cleanup threw: ${describeError(error)}; suspected listener residue`;
+          logger.warn(message);
+          void appendFault({ at: timestamp(), skinId: "(runtime)", kind: "deactivate-failed", message });
+        }
+      }
       pendingSyncCheck = false;
       if (inFlight) {
         await inFlight.settled; // 在途 run 观察 disposed 后有界落定
@@ -923,7 +957,15 @@ export function createSkinRuntime(options: SkinRuntimeOptions): SkinRuntimeContr
       // mirror.load()，事件当下本端快照可能还是旧值（读旧 → 幂等跳过 → 永不重放）。
       // 快照回源时订阅者被通知，把它也接到 syncCheck 上；自身写入回声与在途切换
       // 由 syncCheck 既有语义幂等消化（inFlight 早退 + 落定后 finally 重查）。
-      syncFormOff = store.onChange(() => scheduleSyncCheck());
+      const initialRead = store.readSync();
+      let observedSelection = initialRead.status === "ready" ? initialRead.activeSkin : undefined;
+      syncFormOff = store.onChange(() => {
+        const read = store.readSync();
+        if (read.status !== "ready" || read.activeSkin === observedSelection) return;
+        observedSelection = read.activeSkin;
+        // Unrelated faultLog updates and our own selection-write echoes are not remote switches.
+        if (read.activeSkin !== currentId) scheduleSyncCheck();
+      });
       void recover();
       return () => stop();
     },
